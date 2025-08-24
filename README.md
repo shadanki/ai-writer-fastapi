@@ -1,5 +1,27 @@
 # AI-Writer FastAPI Scaffold
 
+## クイックスタート
+
+### 1. 環境設定
+```bash
+# .envファイルを作成
+cp .env.example .env
+# または手動で.envファイルを作成し、OPENAI_API_KEY等を設定
+```
+
+### 2. サーバー起動
+```bash
+# macOS/Linux
+./start.sh
+
+# Windows
+start.bat
+```
+
+### 3. アクセス
+- API ドキュメント: http://localhost:8000/docs
+- サーバー: http://localhost:8000
+
 ## できること
 - セッション作成（キーワード/下書き保存）
 - タイトル案 5–10件 生成 + 簡易スコア
