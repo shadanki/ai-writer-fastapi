@@ -110,12 +110,26 @@ def generate_outline(db: Session, session_id: str) -> dict[str, Any]:
     try:
         data = json.loads(raw)
     except Exception:
-        # ざっくりフォールバック
+        # ざっくりフォールバック（プロンプトの要求に合わせて3-5個のH1）
         data = {
             "intro": "この記事では要点をわかりやすく解説します。",
-            "h2": [
-                {"title": "基本の理解", "h3": ["定義", "背景"], "keypoints": ["定義", "目的", "効果"]},
-                {"title": "実践の手順", "h3": ["準備", "導入"], "keypoints": ["手順", "注意点", "成功のコツ"]},
+            "h1": [
+                {"title": "基本の理解", "h2": [
+                    {"title": "定義", "h3": ["概念の説明", "重要性"]},
+                    {"title": "背景", "h3": ["歴史的経緯", "現状の課題"]}
+                ], "keypoints": ["定義", "目的", "効果"]},
+                {"title": "実践の手順", "h2": [
+                    {"title": "準備", "h3": ["必要な環境", "事前チェック"]},
+                    {"title": "導入", "h3": ["段階的実施", "効果測定"]}
+                ], "keypoints": ["手順", "注意点", "成功のコツ"]},
+                {"title": "よくある課題と解決策", "h2": [
+                    {"title": "課題の特定", "h3": ["よくある失敗パターン", "根本原因の分析"]},
+                    {"title": "解決アプローチ", "h3": ["予防的対策", "発生時の対処法"]}
+                ], "keypoints": ["課題の早期発見", "効果的な解決策", "継続的な改善"]},
+                {"title": "成功事例とベストプラクティス", "h2": [
+                    {"title": "事例紹介", "h3": ["成功事例の詳細", "失敗事例の教訓"]},
+                    {"title": "実践のポイント", "h3": ["成功の鍵となる要素", "避けるべき落とし穴"]}
+                ], "keypoints": ["成功事例の分析", "ベストプラクティスの適用", "リスク回避"]},
             ],
             "outro": "実行の第一歩を踏み出しましょう。",
         }
@@ -143,17 +157,32 @@ def generate_article(db: Session, session_id: str, outline: dict | None = None) 
     intro_md = f"## 導入\n\n{intro_text}\n\n"
     sections_md.append(intro_md)
 
-    # H2/H3ごとにセクション生成
-    for h2 in outline_data.get("h2", []):
-        h2_title = h2.get("title")
-        if not h2_title:
+    # H1/H2/H3ごとにセクション生成
+    for h1 in outline_data.get("h1", []):
+        h1_title = h1.get("title")
+        if not h1_title:
             continue
-        sec_prompt = SECTION_PROMPT.format(h2_title=h2_title)
-        md = llm.complete_markdown(SYSTEM_PROMPT, sec_prompt)
-        # 簡単な見出し調整
-        if not md.strip().startswith("##"):
-            md = f"## {h2_title}\n\n" + md
-        sections_md.append(md + "\n\n")
+        
+        # H1セクションの開始（記事のメイン見出し）
+        h1_md = f"# {h1_title}\n\n"
+        if h1.get("keypoints"):
+            h1_md += "**要点：**\n"
+            for point in h1["keypoints"]:
+                h1_md += f"- {point}\n"
+            h1_md += "\n"
+        sections_md.append(h1_md)
+        
+        # H2/H3セクションの生成
+        for h2 in h1.get("h2", []):
+            h2_title = h2.get("title")
+            if not h2_title:
+                continue
+            sec_prompt = SECTION_PROMPT.format(h2_title=h2_title)
+            md = llm.complete_markdown(SYSTEM_PROMPT, sec_prompt)
+            # 簡単な見出し調整
+            if not md.strip().startswith("##"):
+                md = f"## {h2_title}\n\n" + md
+            sections_md.append(md + "\n\n")
 
     # まとめ
     outro_text = outline_data.get("outro", "")

@@ -33,11 +33,15 @@ class OutlineReq(BaseModel):
 class H2Block(BaseModel):
     title: str
     h3: list[str]
+
+class H1Block(BaseModel):
+    title: str
+    h2: list[H2Block]
     keypoints: list[str]
 
 class OutlineJSON(BaseModel):
     intro: str
-    h2: list[H2Block]
+    h1: list[H1Block]
     outro: str
 
 class OutlineResp(BaseModel):
