@@ -30,9 +30,13 @@ TITLE_PROMPT = """
 下書き: {draft}
 推定検索意図: {inferred_intents}
 
-# 出力フォーマット(JSON)
+# 出力フォーマット
+必ず以下のJSON形式で出力してください。余分な文字や説明は含めないでください。
+
 [
-  {{"title": "...", "intent":"Informational|Transactional|Comparative", "why":"刺さる理由を1行"}}
+  {{"title": "営業DXの基本知識と導入による効果を徹底解説", "intent": "Informational", "why": "営業DXの重要性と効果を理解したい方に最適な情報を提供します"}},
+  {{"title": "営業DX導入成功事例と失敗しないポイントを紹介", "intent": "Informational", "why": "実際の成功事例を通じて、導入のヒントを得たい方に役立ちます"}},
+  {{"title": "小規模企業でも実践可能な営業DXの導入事例集", "intent": "Informational", "why": "小規模企業向けに具体的な導入事例を紹介し、実現可能性を高めます"}}
 ]
 """.strip()
 

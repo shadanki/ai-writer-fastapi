@@ -26,9 +26,31 @@ def generate_titles(db: Session, session_id: str, max_candidates: int = 10) -> l
     )
     llm = LLMClient()
     raw = llm.complete_json(SYSTEM_PROMPT, prompt)
+    
+    print(f"DEBUG: LLM raw output type: {type(raw)}")
+    print(f"DEBUG: LLM raw output: {raw}")
+    
+    # LLMからの出力を適切にパース
     try:
-        data = json.loads(raw)
-    except Exception:
+        # LLMの出力が既にJSON文字列の場合
+        if isinstance(raw, str):
+            data = json.loads(raw)
+        else:
+            data = raw
+        print(f"DEBUG: Parsed data: {data}")
+        
+        # データが配列でない場合は配列に変換
+        if not isinstance(data, list):
+            print(f"DEBUG: Data is not a list, converting: {type(data)}")
+            if isinstance(data, dict):
+                data = [data]
+            else:
+                data = []
+                
+    except json.JSONDecodeError as e:
+        # JSONパースに失敗した場合のフォールバック
+        print(f"JSON parse error: {e}")
+        print(f"Raw output: {raw}")
         # 出力がJSONでないときのフォールバック（箇条書き→配列化などを簡易整形）
         lines = [l.strip("- • ") for l in raw.splitlines() if l.strip()]
         data = [{"title": l, "intent": None, "why": None} for l in lines if l]
@@ -36,6 +58,13 @@ def generate_titles(db: Session, session_id: str, max_candidates: int = 10) -> l
     # 保存＆スコアリング
     results: list[dict[str, Any]] = []
     for item in data:
+        print(f"DEBUG: Processing item: {item} (type: {type(item)})")
+        
+        # itemが辞書でない場合はスキップ
+        if not isinstance(item, dict):
+            print(f"DEBUG: Skipping non-dict item: {item}")
+            continue
+            
         title = (item.get("title") or "").strip()
         if not title:
             continue

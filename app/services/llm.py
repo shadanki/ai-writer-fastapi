@@ -1,6 +1,7 @@
 from typing import Any
 from openai import OpenAI
 from ..config import settings
+import json
 
 class LLMClient:
     def __init__(self):
@@ -20,7 +21,17 @@ class LLMClient:
             # temperatureパラメータを削除：GPT-5モデルの制限に従いデフォルト値を使用
         )
         text = resp.choices[0].message.content
-        return text
+        
+        print(f"DEBUG: LLM raw text: {text}")
+        
+        # LLMからの出力をJSONとしてパース
+        try:
+            parsed = json.loads(text)
+            print(f"DEBUG: Successfully parsed JSON: {parsed}")
+            return parsed
+        except json.JSONDecodeError as e:
+            print(f"DEBUG: JSON parse failed: {e}")
+            return text
 
     def complete_markdown(self, system: str, user: str, temperature: float = None) -> str:
         resp = self.client.chat.completions.create(
