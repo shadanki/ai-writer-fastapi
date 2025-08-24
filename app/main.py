@@ -86,6 +86,14 @@ def api_export(req: ExportReq, db: Session = Depends(get_db)):
     if not art or not art.markdown:
         raise HTTPException(status_code=400, detail="No article to export")
 
+    # 記事のタイトルを先頭に追加
+    title_header = f"タイトル：{art.selected_title}\n\n"
+    
+    # ```markdownと```を除去
+    cleaned_markdown = art.markdown.replace("```markdown", "").replace("```", "")
+    
+    markdown_with_title = title_header + cleaned_markdown
+
     filename = f"{art.id}.md"
-    path = save_markdown_locally(filename, art.markdown)
+    path = save_markdown_locally(filename, markdown_with_title)
     return {"filePath": path}
