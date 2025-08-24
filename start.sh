@@ -17,7 +17,7 @@ source venv/bin/activate
 
 # 依存関係をチェック・インストール
 echo "📚 依存関係をチェック中..."
-pip install -r requirements.txt
+pip install -r requirements.txt -c constraints.txt
 
 # exportsディレクトリが存在しない場合は作成
 if [ ! -d "exports" ]; then

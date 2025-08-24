@@ -15,7 +15,7 @@ call venv\Scripts\activate.bat
 
 REM 依存関係をチェック・インストール
 echo 📚 依存関係をチェック中...
-pip install -r requirements.txt
+pip install -r requirements.txt -c constraints.txt
 
 REM exportsディレクトリが存在しない場合は作成
 if not exist "exports" (

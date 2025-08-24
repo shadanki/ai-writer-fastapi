@@ -18,6 +18,8 @@ cp .env.example .env
 start.bat
 ```
 
+**注意**: このプロジェクトではhttpxのバージョンが0.27.2に固定されています。
+
 ### 3. アクセス
 - API ドキュメント: http://localhost:8000/docs
 - サーバー: http://localhost:8000
