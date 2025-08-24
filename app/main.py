@@ -47,37 +47,46 @@ def create_session(req: CreateSessionReq, db: Session = Depends(get_db)):
 @app.post("/api/titles", response_model=TitlesResp)
 def api_titles(req: TitlesReq, db: Session = Depends(get_db)):
     try:
-        cands = generate_titles(db, req.sessionId, req.maxCandidates)
+        # セッションIDからtopicを取得
+        session = db.query(Project).filter(Project.id == req.sessionId).first()
+        if not session:
+            raise HTTPException(status_code=404, detail="Session not found")
+        
+        topic = session.topic
+        
+        # タイトル生成を実行
+        titles = generate_titles(db, req.sessionId, req.maxCandidates)
+        return {"candidates": titles}
+        
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"candidates": [TitleCandidateOut(**c) for c in cands]}
 
 
 @app.post("/api/select-title")
 def api_select_title(req: SelectTitleReq, db: Session = Depends(get_db)):
     try:
         art = select_title(db, req.sessionId, req.candidateId)
+        return {"ok": True, "articleId": art.id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"ok": True, "articleId": art.id}
 
 
 @app.post("/api/generate-outline", response_model=OutlineResp)
 def api_generate_outline(req: OutlineReq, db: Session = Depends(get_db)):
     try:
         outline = generate_outline(db, req.sessionId)
+        return {"outline": outline}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"outline": outline}
 
 
 @app.post("/api/generate-article", response_model=GenerateArticleResp)
 def api_generate_article(req: GenerateArticleReq, db: Session = Depends(get_db)):
     try:
         markdown, sections = generate_article(db, req.sessionId, req.outline.model_dump() if req.outline else None)
+        return {"markdown": markdown, "sections": sections}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    return {"markdown": markdown, "sections": sections}
 
 
 @app.post("/api/export", response_model=ExportResp)
