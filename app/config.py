@@ -1,5 +1,9 @@
 from pydantic import BaseModel
 import os
+from dotenv import load_dotenv
+
+# .envファイルを読み込む
+load_dotenv()
 
 class Settings(BaseModel):
     openai_api_key: str | None = os.getenv("OPENAI_API_KEY")

@@ -17,18 +17,18 @@ class LLMClient:
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            temperature=0.7,
+            # temperatureパラメータを削除：GPT-5モデルの制限に従いデフォルト値を使用
         )
         text = resp.choices[0].message.content
         return text
 
-    def complete_markdown(self, system: str, user: str, temperature: float = 0.6) -> str:
+    def complete_markdown(self, system: str, user: str, temperature: float = None) -> str:
         resp = self.client.chat.completions.create(
             model=self.model,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            temperature=temperature,
+            # temperatureパラメータを削除：GPT-5モデルの制限に従いデフォルト値を使用
         )
         return resp.choices[0].message.content
