@@ -22,15 +22,11 @@ class LLMClient:
         )
         text = resp.choices[0].message.content
         
-        print(f"DEBUG: LLM raw text: {text}")
-        
         # LLMからの出力をJSONとしてパース
         try:
             parsed = json.loads(text)
-            print(f"DEBUG: Successfully parsed JSON: {parsed}")
             return parsed
         except json.JSONDecodeError as e:
-            print(f"DEBUG: JSON parse failed: {e}")
             raise ValueError(f"LLM output is not valid JSON: {text}")
 
     def complete_markdown(self, system: str, user: str, temperature: float = None) -> str:

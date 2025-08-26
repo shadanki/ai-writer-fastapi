@@ -104,23 +104,38 @@ def generate_outline(db: Session, session_id: str) -> dict[str, Any]:
 
     llm = LLMClient()
     prompt = OUTLINE_PROMPT.format(selected_title=prj.article.selected_title)
-    raw = llm.complete_json(SYSTEM_PROMPT, prompt)
-
-    # まずは raw の型で分岐（complete_json が既に dict/list を返すことがある）
-    if isinstance(raw, (dict, list)):
-        data = raw
-    else:
-        # 次に JSON 文字列としてパース
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            # JSONパースに失敗した場合はエラーを発生させる
-            raise ValueError(f"Failed to parse outline from LLM output: {raw}")
-
-    # 保存
-    prj.article.outline = data
-    db.commit()
-    return data
+    
+    try:
+        raw = llm.complete_json(SYSTEM_PROMPT, prompt)
+        
+        # まずは raw の型で分岐（complete_json が既に dict/list を返すことがある）
+        if isinstance(raw, (dict, list)):
+            data = raw
+        else:
+            # 次に JSON 文字列としてパース
+            try:
+                data = json.loads(raw)
+            except json.JSONDecodeError as e:
+                # JSONパースに失敗した場合はエラーを発生させる
+                raise ValueError(f"Failed to parse outline from LLM output: {raw}")
+        
+        # データの構造を検証
+        if isinstance(data, dict):
+            required_keys = ["intro", "h1", "outro"]
+            missing_keys = [key for key in required_keys if key not in data]
+            if missing_keys:
+                raise ValueError(f"Missing required keys in outline: {missing_keys}")
+            
+            if not isinstance(data.get("h1"), list):
+                raise ValueError("h1 must be a list")
+        
+        # 保存
+        prj.article.outline = data
+        db.commit()
+        return data
+        
+    except Exception as e:
+        raise
 
 
 def generate_article(db: Session, session_id: str, outline: dict | None = None) -> tuple[str, list[str]]:

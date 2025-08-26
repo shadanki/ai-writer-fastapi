@@ -24,7 +24,10 @@ export function PreviewPane({ markdownContent }: PreviewPaneProps) {
     }
 
     try {
-      await navigator.clipboard.writeText(markdownContent)
+      // ```markdownと```を除去してからコピー
+      const cleanedMarkdown = markdownContent.replace(/```markdown/g, "").replace(/```/g, "")
+      
+      await navigator.clipboard.writeText(cleanedMarkdown)
       toast({
         title: "成功",
         description: "Markdownをクリップボードにコピーしました。",
