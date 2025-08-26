@@ -1,8 +1,0 @@
-{
-  "/page": "app/page.js",
-  "/api/select-title/route": "app/api/select-title/route.js",
-  "/api/generate-outline/route": "app/api/generate-outline/route.js",
-  "/api/session/route": "app/api/session/route.js",
-  "/api/generate-titles/route": "app/api/generate-titles/route.js",
-  "/api/generate-article/route": "app/api/generate-article/route.js"
-}
