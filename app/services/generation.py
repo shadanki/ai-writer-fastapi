@@ -25,42 +25,33 @@ def generate_titles(db: Session, session_id: str, max_candidates: int = 10) -> l
         inferred_intents=", ".join(intents),
     )
     llm = LLMClient()
-    raw = llm.complete_json(SYSTEM_PROMPT, prompt)
     
-    print(f"DEBUG: LLM raw output type: {type(raw)}")
-    print(f"DEBUG: LLM raw output: {raw}")
-    
-    # LLMからの出力を適切にパース
     try:
-        # LLMの出力が既にJSON文字列の場合
+        raw = llm.complete_json(SYSTEM_PROMPT, prompt)
+        
+        # LLMからの出力を適切にパース
         if isinstance(raw, str):
             data = json.loads(raw)
         else:
             data = raw
-        print(f"DEBUG: Parsed data: {data}")
-        
+            
         # データが配列でない場合は配列に変換
         if not isinstance(data, list):
-            print(f"DEBUG: Data is not a list, converting: {type(data)}")
             if isinstance(data, dict):
                 data = [data]
             else:
                 data = []
                 
     except json.JSONDecodeError as e:
-        # JSONパースに失敗した場合はエラーを発生させる
-        print(f"JSON parse error: {e}")
-        print(f"Raw output: {raw}")
         raise ValueError(f"Failed to parse titles from LLM output: {raw}")
+    except Exception as e:
+        raise ValueError(f"Error generating titles: {str(e)}")
 
     # 保存＆スコアリング
     results: list[dict[str, Any]] = []
     for item in data:
-        print(f"DEBUG: Processing item: {item} (type: {type(item)})")
-        
         # itemが辞書でない場合はスキップ
         if not isinstance(item, dict):
-            print(f"DEBUG: Skipping non-dict item: {item}")
             continue
             
         title = (item.get("title") or "").strip()
@@ -191,7 +182,7 @@ def generate_article(db: Session, session_id: str, outline: dict | None = None) 
     joined = "\n".join(sections_md)
     glossary = "用語統一: DX, プロジェクト管理, KGI/KPI"
     final_md = llm.complete_markdown(SYSTEM_PROMPT, FINAL_POLISH_PROMPT.format(glossary=glossary) + "\n\n" + joined)
-
+    
     # Front Matter付与（アウトラインの導入文を description に）
     description = outline_data.get("intro", "") if isinstance(outline_data, dict) else ""
     fm = front_matter(

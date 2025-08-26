@@ -27,7 +27,11 @@ class LLMClient:
             parsed = json.loads(text)
             return parsed
         except json.JSONDecodeError as e:
-            raise ValueError(f"LLM output is not valid JSON: {text}")
+            # エラーの詳細情報を含めて例外を発生
+            error_msg = f"LLM output is not valid JSON: {text}\nJSON Error: {e}"
+            if hasattr(e, 'lineno') and hasattr(e, 'colno'):
+                error_msg += f"\nError at line {e.lineno}, column {e.colno}"
+            raise ValueError(error_msg)
 
     def complete_markdown(self, system: str, user: str, temperature: float = None) -> str:
         resp = self.client.chat.completions.create(
