@@ -3,10 +3,13 @@
 import { useState } from "react"
 import { Toaster } from "@/components/ui/toaster"
 import { BlogWizardForm } from "@/components/blog-wizard-form"
-import { PreviewPane } from "@/components/preview-pane"
 
 export default function BlogWizardPage() {
-  const [markdownContent, setMarkdownContent] = useState("")
+  const [markdownContent, setMarkdownContent] = useState<string>("")
+
+  const handleMarkdownUpdate = (content: string) => {
+    setMarkdownContent(content)
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -16,12 +19,8 @@ export default function BlogWizardPage() {
         <div className="grid grid-cols-1 gap-6">
           {/* 各ステップのカード */}
           <div className="space-y-6">
-            <BlogWizardForm onMarkdownUpdate={setMarkdownContent} />
+            <BlogWizardForm onMarkdownUpdate={handleMarkdownUpdate} />
           </div>
-
-          {markdownContent ? (
-             <div className="mt-6"><PreviewPane markdownContent={markdownContent} /></div>
-          ) : null}
         </div>
       </div>
       <Toaster />
