@@ -48,12 +48,10 @@ def generate_titles(db: Session, session_id: str, max_candidates: int = 10) -> l
                 data = []
                 
     except json.JSONDecodeError as e:
-        # JSONパースに失敗した場合のフォールバック
+        # JSONパースに失敗した場合はエラーを発生させる
         print(f"JSON parse error: {e}")
         print(f"Raw output: {raw}")
-        # 出力がJSONでないときのフォールバック（箇条書き→配列化などを簡易整形）
-        lines = [l.strip("- • ") for l in raw.splitlines() if l.strip()]
-        data = [{"title": l, "intent": None, "why": None} for l in lines if l]
+        raise ValueError(f"Failed to parse titles from LLM output: {raw}")
 
     # 保存＆スコアリング
     results: list[dict[str, Any]] = []
@@ -116,30 +114,8 @@ def generate_outline(db: Session, session_id: str) -> dict[str, Any]:
         try:
             data = json.loads(raw)
         except json.JSONDecodeError:
-            # パースに失敗した場合は、ざっくりフォールバック
-            # ざっくりフォールバック（プロンプトの要求に合わせて3-5個のH1）
-            data = {
-                "intro": "この記事では要点をわかりやすく解説します。",
-                "h1": [
-                    {"title": "基本の理解", "h2": [
-                        {"title": "定義", "h3": ["概念の説明", "重要性"]},
-                        {"title": "背景", "h3": ["歴史的経緯", "現状の課題"]}
-                    ], "keypoints": ["定義", "目的", "効果"]},
-                    {"title": "実践の手順", "h2": [
-                        {"title": "準備", "h3": ["必要な環境", "事前チェック"]},
-                        {"title": "導入", "h3": ["段階的実施", "効果測定"]}
-                    ], "keypoints": ["手順", "注意点", "成功のコツ"]},
-                    {"title": "よくある課題と解決策", "h2": [
-                        {"title": "課題の特定", "h3": ["よくある失敗パターン", "根本原因の分析"]},
-                        {"title": "解決アプローチ", "h3": ["予防的対策", "発生時の対処法"]}
-                    ], "keypoints": ["課題の早期発見", "効果的な解決策", "継続的な改善"]},
-                    {"title": "成功事例とベストプラクティス", "h2": [
-                        {"title": "事例紹介", "h3": ["成功事例の詳細", "失敗事例の教訓"]},
-                        {"title": "実践のポイント", "h3": ["成功の鍵となる要素", "避けるべき落とし穴"]}
-                    ], "keypoints": ["成功事例の分析", "ベストプラクティスの適用", "リスク回避"]},
-                ],
-                "outro": "実行の第一歩を踏み出しましょう。",
-            }
+            # JSONパースに失敗した場合はエラーを発生させる
+            raise ValueError(f"Failed to parse outline from LLM output: {raw}")
 
     # 保存
     prj.article.outline = data
@@ -209,10 +185,8 @@ def generate_article(db: Session, session_id: str, outline: dict | None = None) 
         tags=[prj.topic, "入門", "実践ガイド"],
         lang=prj.language,
     )
-    # 「final_md」が得られない場合のバックアップとして full_md を用意
-    full_md = fm + "# " + prj.article.selected_title + "\n\n> 本記事の要点は本文冒頭の箇条書きを参照してください。\n\n" + joined
 
     # 保存
-    prj.article.markdown = final_md or full_md
+    prj.article.markdown = final_md
     db.commit()
     return (prj.article.markdown, sections_md)

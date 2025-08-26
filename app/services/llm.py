@@ -31,7 +31,7 @@ class LLMClient:
             return parsed
         except json.JSONDecodeError as e:
             print(f"DEBUG: JSON parse failed: {e}")
-            return text
+            raise ValueError(f"LLM output is not valid JSON: {text}")
 
     def complete_markdown(self, system: str, user: str, temperature: float = None) -> str:
         resp = self.client.chat.completions.create(

@@ -11,22 +11,12 @@ from .schemas import (
 )
 from .services.generation import generate_titles, select_title, generate_outline, generate_article
 from .services.exporter import save_markdown_locally
-from pathlib import Path
-from fastapi.responses import RedirectResponse
-from fastapi.staticfiles import StaticFiles
-
 app = FastAPI(title="AI-Writer API", version="0.1.0")
 
-# == /static の設定 ==
-BASE_DIR = Path(__file__).resolve().parent          # ← app/ ディレクトリ
-STATIC_DIR = BASE_DIR / "static"                    # ← app/static/
-
-app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-
-# ルートにアクセスしたら index.html へ飛ばす
+# ルートにアクセスしたら API の情報を返す
 @app.get("/")
 def root():
-    return RedirectResponse(url="/static/index.html", status_code=302)
+    return {"message": "AI-Writer API", "version": "0.1.0"}
 
 # DB初期化
 Base.metadata.create_all(bind=engine)
