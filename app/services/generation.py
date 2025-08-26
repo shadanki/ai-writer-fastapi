@@ -107,32 +107,39 @@ def generate_outline(db: Session, session_id: str) -> dict[str, Any]:
     llm = LLMClient()
     prompt = OUTLINE_PROMPT.format(selected_title=prj.article.selected_title)
     raw = llm.complete_json(SYSTEM_PROMPT, prompt)
-    try:
-        data = json.loads(raw)
-    except Exception:
-        # ざっくりフォールバック（プロンプトの要求に合わせて3-5個のH1）
-        data = {
-            "intro": "この記事では要点をわかりやすく解説します。",
-            "h1": [
-                {"title": "基本の理解", "h2": [
-                    {"title": "定義", "h3": ["概念の説明", "重要性"]},
-                    {"title": "背景", "h3": ["歴史的経緯", "現状の課題"]}
-                ], "keypoints": ["定義", "目的", "効果"]},
-                {"title": "実践の手順", "h2": [
-                    {"title": "準備", "h3": ["必要な環境", "事前チェック"]},
-                    {"title": "導入", "h3": ["段階的実施", "効果測定"]}
-                ], "keypoints": ["手順", "注意点", "成功のコツ"]},
-                {"title": "よくある課題と解決策", "h2": [
-                    {"title": "課題の特定", "h3": ["よくある失敗パターン", "根本原因の分析"]},
-                    {"title": "解決アプローチ", "h3": ["予防的対策", "発生時の対処法"]}
-                ], "keypoints": ["課題の早期発見", "効果的な解決策", "継続的な改善"]},
-                {"title": "成功事例とベストプラクティス", "h2": [
-                    {"title": "事例紹介", "h3": ["成功事例の詳細", "失敗事例の教訓"]},
-                    {"title": "実践のポイント", "h3": ["成功の鍵となる要素", "避けるべき落とし穴"]}
-                ], "keypoints": ["成功事例の分析", "ベストプラクティスの適用", "リスク回避"]},
-            ],
-            "outro": "実行の第一歩を踏み出しましょう。",
-        }
+
+    # まずは raw の型で分岐（complete_json が既に dict/list を返すことがある）
+    if isinstance(raw, (dict, list)):
+        data = raw
+    else:
+        # 次に JSON 文字列としてパース
+        try:
+            data = json.loads(raw)
+        except json.JSONDecodeError:
+            # パースに失敗した場合は、ざっくりフォールバック
+            # ざっくりフォールバック（プロンプトの要求に合わせて3-5個のH1）
+            data = {
+                "intro": "この記事では要点をわかりやすく解説します。",
+                "h1": [
+                    {"title": "基本の理解", "h2": [
+                        {"title": "定義", "h3": ["概念の説明", "重要性"]},
+                        {"title": "背景", "h3": ["歴史的経緯", "現状の課題"]}
+                    ], "keypoints": ["定義", "目的", "効果"]},
+                    {"title": "実践の手順", "h2": [
+                        {"title": "準備", "h3": ["必要な環境", "事前チェック"]},
+                        {"title": "導入", "h3": ["段階的実施", "効果測定"]}
+                    ], "keypoints": ["手順", "注意点", "成功のコツ"]},
+                    {"title": "よくある課題と解決策", "h2": [
+                        {"title": "課題の特定", "h3": ["よくある失敗パターン", "根本原因の分析"]},
+                        {"title": "解決アプローチ", "h3": ["予防的対策", "発生時の対処法"]}
+                    ], "keypoints": ["課題の早期発見", "効果的な解決策", "継続的な改善"]},
+                    {"title": "成功事例とベストプラクティス", "h2": [
+                        {"title": "事例紹介", "h3": ["成功事例の詳細", "失敗事例の教訓"]},
+                        {"title": "実践のポイント", "h3": ["成功の鍵となる要素", "避けるべき落とし穴"]}
+                    ], "keypoints": ["成功事例の分析", "ベストプラクティスの適用", "リスク回避"]},
+                ],
+                "outro": "実行の第一歩を踏み出しましょう。",
+            }
 
     # 保存
     prj.article.outline = data
@@ -194,8 +201,15 @@ def generate_article(db: Session, session_id: str, outline: dict | None = None) 
     glossary = "用語統一: DX, プロジェクト管理, KGI/KPI"
     final_md = llm.complete_markdown(SYSTEM_PROMPT, FINAL_POLISH_PROMPT.format(glossary=glossary) + "\n\n" + joined)
 
-    # Front Matter付与
-    fm = front_matter(prj.article.selected_title, description=outline_data.get("intro", ""), tags=[prj.topic, "入門", "実践ガイド"], lang=prj.language)
+    # Front Matter付与（アウトラインの導入文を description に）
+    description = outline_data.get("intro", "") if isinstance(outline_data, dict) else ""
+    fm = front_matter(
+        prj.article.selected_title,
+        description=description,
+        tags=[prj.topic, "入門", "実践ガイド"],
+        lang=prj.language,
+    )
+    # 「final_md」が得られない場合のバックアップとして full_md を用意
     full_md = fm + "# " + prj.article.selected_title + "\n\n> 本記事の要点は本文冒頭の箇条書きを参照してください。\n\n" + joined
 
     # 保存
