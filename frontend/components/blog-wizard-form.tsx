@@ -210,7 +210,7 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
             <Card className="mb-4 bg-muted/50">
               <CardContent>
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">ブログタイトル</p>
+                  <p className="text-sm text-muted-foreground mb-2">選択したタイトル</p>
                   <p className="text-2xl font-semibold text-primary">{selectedTitle}</p>
                 </div>
               </CardContent>
@@ -243,7 +243,7 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
             <Card className="mb-4 bg-muted/50">
               <CardContent>
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">ブログタイトル</p>
+                  <p className="text-sm text-muted-foreground mb-2">選択したタイトル</p>
                   <p className="text-2xl font-semibold text-primary">{selectedTitle}</p>
                 </div>
               </CardContent>
@@ -281,7 +281,7 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
             <Card className="mb-4 bg-muted/50">
               <CardContent>
                 <div className="text-center">
-                  <p className="text-sm text-muted-foreground mb-2">ブログタイトル</p>
+                  <p className="text-sm text-muted-foreground mb-2">選択したタイトル</p>
                   <p className="text-2xl font-semibold text-primary">{selectedTitle}</p>
                 </div>
               </CardContent>

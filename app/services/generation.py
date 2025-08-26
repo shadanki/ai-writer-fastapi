@@ -112,13 +112,13 @@ def generate_outline(db: Session, session_id: str) -> dict[str, Any]:
         
         # データの構造を検証
         if isinstance(data, dict):
-            required_keys = ["intro", "h1", "outro"]
+            required_keys = ["intro", "title", "h2", "outro"]
             missing_keys = [key for key in required_keys if key not in data]
             if missing_keys:
                 raise ValueError(f"Missing required keys in outline: {missing_keys}")
             
-            if not isinstance(data.get("h1"), list):
-                raise ValueError("h1 must be a list")
+            if not isinstance(data.get("h2"), list):
+                raise ValueError("h2 must be a list")
         
         # 保存
         prj.article.outline = data
@@ -146,31 +146,37 @@ def generate_article(db: Session, session_id: str, outline: dict | None = None) 
     intro_md = f"## 導入\n\n{intro_text}\n\n"
     sections_md.append(intro_md)
 
-    # H1/H2/H3ごとにセクション生成
-    for h1 in outline_data.get("h1", []):
-        h1_title = h1.get("title")
-        if not h1_title:
+    # 記事タイトル（H1）
+    title_text = outline_data.get("title", "")
+    if title_text:
+        title_md = f"# {title_text}\n\n"
+        sections_md.append(title_md)
+
+    # H2/H3ごとにセクション生成
+    for h2 in outline_data.get("h2", []):
+        h2_title = h2.get("title")
+        if not h2_title:
             continue
         
-        # H1セクションの開始（記事のメイン見出し）
-        h1_md = f"# {h1_title}\n\n"
-        if h1.get("keypoints"):
-            h1_md += "**要点：**\n"
-            for point in h1["keypoints"]:
-                h1_md += f"- {point}\n"
-            h1_md += "\n"
-        sections_md.append(h1_md)
+        # H2セクションの開始（記事のメイン見出し）
+        h2_md = f"## {h2_title}\n\n"
+        if h2.get("keypoints"):
+            h2_md += "**要点：**\n"
+            for point in h2["keypoints"]:
+                h2_md += f"- {point}\n"
+            h2_md += "\n"
+        sections_md.append(h2_md)
         
-        # H2/H3セクションの生成
-        for h2 in h1.get("h2", []):
-            h2_title = h2.get("title")
-            if not h2_title:
+        # H3セクションの生成
+        for h3 in h2.get("h3", []):
+            h3_title = h3.get("title")
+            if not h3_title:
                 continue
-            sec_prompt = SECTION_PROMPT.format(h2_title=h2_title)
+            sec_prompt = SECTION_PROMPT.format(h2_title=h3_title)
             md = llm.complete_markdown(SYSTEM_PROMPT, sec_prompt)
             # 簡単な見出し調整
-            if not md.strip().startswith("##"):
-                md = f"## {h2_title}\n\n" + md
+            if not md.strip().startswith("###"):
+                md = f"### {h3_title}\n\n" + md
             sections_md.append(md + "\n\n")
 
     # まとめ
@@ -180,8 +186,7 @@ def generate_article(db: Session, session_id: str, outline: dict | None = None) 
 
     # 最終整形
     joined = "\n".join(sections_md)
-    glossary = "用語統一: DX, プロジェクト管理, KGI/KPI"
-    final_md = llm.complete_markdown(SYSTEM_PROMPT, FINAL_POLISH_PROMPT.format(glossary=glossary) + "\n\n" + joined)
+    final_md = llm.complete_markdown(SYSTEM_PROMPT, FINAL_POLISH_PROMPT.format(glossary="") + "\n\n" + joined)
     
     # Front Matter付与（アウトラインの導入文を description に）
     description = outline_data.get("intro", "") if isinstance(outline_data, dict) else ""

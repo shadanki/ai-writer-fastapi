@@ -30,18 +30,19 @@ class SelectTitleReq(BaseModel):
 class OutlineReq(BaseModel):
     sessionId: str
 
+class H3Block(BaseModel):
+    title: str
+    content: list[str]
+
 class H2Block(BaseModel):
     title: str
-    h3: list[str]
-
-class H1Block(BaseModel):
-    title: str
-    h2: list[H2Block]
+    h3: list[H3Block]
     keypoints: list[str]
 
 class OutlineJSON(BaseModel):
     intro: str
-    h1: list[H1Block]
+    title: str
+    h2: list[H2Block]
     outro: str
 
 class OutlineResp(BaseModel):
