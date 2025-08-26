@@ -52,20 +52,12 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
         const sessionResponse = await api.createSession({ topic, summary: summary.trim() || null })
         currentSessionId = sessionResponse.sessionId
         setSessionId(currentSessionId)
-        toast({
-          title: "成功",
-          description: "セッションが作成されました。",
-        })
       }
 
       // タイトル生成
       const { candidates } = await api.generateTitles(currentSessionId, 10)
       setTitles(candidates)
       setCurrentStep(2)
-      toast({
-        title: "成功",
-        description: "タイトル候補を生成しました。",
-      })
     } catch (error) {
       toast({
         title: "エラー",
@@ -94,7 +86,6 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
       await api.selectTitle(sessionId, candidateId)
       setSelectedCandidateId(candidateId)
       setSelectedTitle(title)
-      toast({ title: "成功", description: "タイトルが選択されました。", })
       
       // Step3（アウトライン生成中）に遷移
       setCurrentStep(3)
@@ -104,7 +95,6 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
       
       setOutline(outline)
       setCurrentStep(4) // アウトライン確認画面に遷移
-      toast({ title: "成功", description: "アウトラインを生成しました。", })
       
     } catch (error) {
       toast({ title: "エラー", description: "タイトル選択またはアウトライン生成に失敗しました。", variant: "destructive", })
@@ -130,10 +120,6 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
       setMarkdown(response.markdown)
       onMarkdownUpdate(response.markdown)
       setCurrentStep(5) // プレビュー画面に遷移
-      toast({
-        title: "成功",
-        description: "記事を生成しました。",
-      })
     } catch (error) {
       toast({
         title: "エラー",
@@ -219,63 +205,102 @@ export function BlogWizardForm({ onMarkdownUpdate }: BlogWizardFormProps) {
 
       case 3:
         return (
-          <Card className="ring-2 ring-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">
-                  3
-                </span>
-                アウトライン生成中
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="text-center py-8">
-                <Loader2 className="mx-auto h-8 w-8 animate-spin mb-4" />
-                <p className="text-lg font-medium mb-2">アウトラインを生成中...</p>
-                <p className="text-sm text-muted-foreground">しばらくお待ちください</p>
-              </div>
-            </CardContent>
-          </Card>
+          <>
+            {/* 選択されたタイトル表示 */}
+            <Card className="mb-4 bg-muted/50">
+              <CardContent>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">ブログタイトル</p>
+                  <p className="text-2xl font-semibold text-primary">{selectedTitle}</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="ring-2 ring-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">
+                    3
+                  </span>
+                  アウトライン生成中
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="text-center py-8">
+                  <Loader2 className="mx-auto h-8 w-8 animate-spin mb-4" />
+                  <p className="text-lg font-medium mb-2">アウトラインを生成中...</p>
+                  <p className="text-sm text-muted-foreground">しばらくお待ちください</p>
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )
 
       case 4:
         return (
-          <Card className="ring-2 ring-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">
-                  4
-                </span>
-                アウトライン確認
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {outline && <OutlinePanel outline={outline} />}
-              <div className="flex justify-end">
-                <Button onClick={handleGenerateArticle} disabled={isLoading}>
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  本文生成へ
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <>
+            {/* 選択されたタイトル表示 */}
+            <Card className="mb-4 bg-muted/50">
+              <CardContent>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">ブログタイトル</p>
+                  <p className="text-2xl font-semibold text-primary">{selectedTitle}</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="ring-2 ring-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">
+                    4
+                  </span>
+                  アウトライン確認
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {outline && <OutlinePanel outline={outline} />}
+                <div className="flex items-center justify-end gap-4">
+                  <p className="text-sm text-muted-foreground">
+                    本文の生成には５分程度要する場合があります
+                  </p>
+                  <Button onClick={handleGenerateArticle} disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    本文生成
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </>
         )
 
       case 5:
         return (
-          <Card className="ring-2 ring-primary">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">
-                  5
-                </span>
-                プレビュー
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <PreviewPane markdownContent={markdown} />
-            </CardContent>
-          </Card>
+          <>
+            {/* 選択されたタイトル表示 */}
+            <Card className="mb-4 bg-muted/50">
+              <CardContent>
+                <div className="text-center">
+                  <p className="text-sm text-muted-foreground mb-2">ブログタイトル</p>
+                  <p className="text-2xl font-semibold text-primary">{selectedTitle}</p>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="ring-2 ring-primary">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center text-sm">
+                    5
+                  </span>
+                  プレビュー
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <PreviewPane markdownContent={markdown} />
+              </CardContent>
+            </Card>
+          </>
         )
 
       default:
