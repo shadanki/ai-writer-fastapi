@@ -13,6 +13,8 @@ export async function POST(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
+      // 10分（600秒）のタイムアウト設定を追加
+      signal: AbortSignal.timeout(600000),
     });
 
     if (!response.ok) {
