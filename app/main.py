@@ -11,12 +11,12 @@ from .schemas import (
 )
 from .services.generation import generate_titles, select_title, generate_outline, generate_article
 from .services.exporter import save_markdown_locally
-app = FastAPI(title="AI-Writer API", version="0.1.0")
+app = FastAPI(title="LLMO Blog Writer API", version="0.1.0")
 
 # ルートにアクセスしたら API の情報を返す
 @app.get("/")
 def root():
-    return {"message": "AI-Writer API", "version": "0.1.0"}
+    return {"message": "LLMO Blog Writer API", "version": "0.1.0"}
 
 # DB初期化
 Base.metadata.create_all(bind=engine)

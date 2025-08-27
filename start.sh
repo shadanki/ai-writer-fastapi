@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# AI-Writer FastAPI サーバー起動スクリプト
+# LLMO Blog Writer サーバー起動スクリプト
 
-echo "🚀 AI-Writer FastAPI サーバーを起動しています..."
+echo "🚀 LLMO Blog Writer サーバーを起動しています..."
 
 # 仮想環境が存在するかチェック
 if [ ! -d "venv" ]; then

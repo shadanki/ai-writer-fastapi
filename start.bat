@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-echo 🚀 AI-Writer FastAPI サーバーを起動しています...
+echo 🚀 LLMO Blog Writer サーバーを起動しています...
 
 REM 仮想環境が存在するかチェック
 if not exist "venv" (

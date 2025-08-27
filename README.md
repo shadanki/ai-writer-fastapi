@@ -1,4 +1,4 @@
-# AI-Writer FastAPI
+# LLMO Blog Writer
 
 **LLMO（Large Language Model Optimization）に最適化した記事作成支援システム**です。キーワードから記事のタイトル生成、アウトライン作成、本文生成まで、記事作成の全工程をサポートし、LLMに引用される記事を生成します。
 
@@ -35,7 +35,7 @@
 
 ```bash
 git clone <repository-url>
-cd ai-writer-fastapi
+cd llmo-blog-writer
 ```
 
 ### 2. 環境変数の設定
@@ -45,7 +45,7 @@ cd ai-writer-fastapi
 ```env
 OPENAI_API_KEY=your_api_key_here
 OPENAI_MODEL=gpt-4o-mini
-DATABASE_URL=sqlite:///./aiwriter.db
+DATABASE_URL=sqlite:///./llmoblogwriter.db
 EXPORT_DIR=./exports
 CORS_ORIGINS=http://localhost:3000,http://localhost:8080
 ```
@@ -111,7 +111,7 @@ npm run dev
 ## 📁 プロジェクト構造
 
 ```
-ai-writer-fastapi/
+llmo-blog-writer/
 ├── app/                    # FastAPI バックエンド
 │   ├── main.py            # メインアプリケーション
 │   ├── models.py          # データベースモデル

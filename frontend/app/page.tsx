@@ -14,7 +14,7 @@ export default function BlogWizardPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6">
-        <h1 className="text-3xl font-bold text-center mb-8">ブログ生成ウィザード</h1>
+        <h1 className="text-3xl font-bold text-center mb-8">LLMO Blog Writer</h1>
 
         <div className="grid grid-cols-1 gap-6">
           {/* 各ステップのカード */}
